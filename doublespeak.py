@@ -388,7 +388,7 @@ def main():
     parser.add_argument(
         '--model-name',
         type=str,
-        default="context-labs/meta-llama-Llama-3.2-3B-Instruct-FP16",
+        default="HuggingFaceTB/SmolLM3-3B-Base",
         help="The Hugging Face model identifier to use.\n(default: %(default)s)"
     )
     # ... (all other global arguments like --top-p, --ending, --verbose, etc. remain the same)
@@ -494,7 +494,7 @@ def main():
             print(f"{ORANGE}{logo}{RESET}", file=sys.stderr)
         except (FileNotFoundError, NameError):
             print('DS', file=sys.stderr)
-        print(f"{ORANGE}--- DoubleSpeak v{VERSION} ---{RESET}", file=sys.stderr)
+        print(f"--- DoubleSpeak v{VERSION} ---", file=sys.stderr)
 
     # --- Get content for all inputs ---
     main_content = get_content_from_source(args.source)
