@@ -20,6 +20,7 @@ def require_loaded(method):
         return method(self, *args, **kwargs)
     return wrapper
 
+
 def progress_bar(name: str, iteration: int, total: int, length=40, refuse_finish: bool = False):
     
     percent = 100 * (iteration / float(total))
