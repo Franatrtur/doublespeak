@@ -1,12 +1,13 @@
 # Model Name: `gpt2`
 
-Demonstration for Doublepeak.
+Would recommend for articles and natural text but not structured data or code.
+Closer inspection leads one to see it is an ai text.
 
-## Demo 1
+## Demo 1 - Article
 
 #### Settings
 
-*Note: Different naming of the parameters and values might be required for either commandline or python usage. Check the documentation*
+*Note: Different naming of the parameters and values might be required for either commandline or python usage. Check the documentation.*
 ```
 model-name="gpt2"
 end-bias=3 

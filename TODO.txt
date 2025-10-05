@@ -1,3 +1,0 @@
-add params to the table of tested models in readme
-test more models to deem if theyre good
-do more example demos of the good ones

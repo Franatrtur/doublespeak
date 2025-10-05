@@ -402,8 +402,8 @@ def main():
         help="A bias added to the logit of the EOS token.\n(default: %(default)s)"
     )
     parser.add_argument(
-        '-v', '--verbose', action='store_true',
-        help="Enable verbose logging (e.g., progress bars) to stderr."
+        '-q', '--quiet', action='store_true',
+        help="Disable verbose logging (e.g., progress bars) to stderr."
     )
     parser.add_argument(
         '--debug', action='store_true',
@@ -482,7 +482,7 @@ def main():
         return source_str
 
 
-    if args.verbose or args.debug:
+    if not args.quiet or args.debug:
         try:
             from pathlib import Path
             logo_path = Path(__file__).parent / 'logo.txt'
@@ -506,9 +506,12 @@ def main():
 
     try:
         ds = DoubleSpeak(
-            model_name=args.model_name, top_p=args.top_p,
-            ending=ending_map[args.ending], end_bias=args.end_bias,
-            verbose=args.verbose, debug=args.debug
+            model_name = args.model_name,
+            top_p = args.top_p,
+            ending = ending_map[args.ending],
+            end_bias = args.end_bias,
+            verbose = not args.quiet,
+            debug = args.debug
         )
 
         with args.output as output_file:
