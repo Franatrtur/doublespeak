@@ -95,7 +95,7 @@ These are all publicly available models on huggingface which can be passed as th
 | Model Name | Recommended settings | Notes |
 | :--- | :--- | :--- |
 | **`gpt2`** | `end_bias=3`, `top_p=0.5` | Quick and small for plain text. Can get overwhelmed. |
-| **`HuggingFaceTB/SmolLM3-3B-Base`** | Text: `end_bias=3`, `top_p=0.65` / Code: `end_bias=6`, `top_p=0.75` | Good bang for your buck. |
+| **`HuggingFaceTB/SmolLM3-3B-Base`** | Text: `end_bias=3`, `top_p=0.65` / Code: `end_bias=6`, `top_p=0.8` | Good bang for your buck. |
 
 
 

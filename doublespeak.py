@@ -240,6 +240,10 @@ class DoubleSpeak:
                     found_index = index
                     break
             
+            if self.debug and found_index != self.InvalidIndex:
+                token_str = repr(self.tokenizer.decode(next_token_id))
+                print(f"_decode_bytes: Token {token_str} found at index {found_index} out of {base}", file=sys.stderr)
+            
             if found_index == self.InvalidIndex:
                 raise ValueError(f'Invalid stegotext: Could not decode token ID {next_token_id} at index {i}.')
             
@@ -333,7 +337,6 @@ class DoubleSpeak:
                     natural_prob = natural_probabilities[0, token_id_int].item()
                     viable_tokens.append((token_id_int, natural_prob))
                     break # We only need the single best one.
-        # --- END OF FIX ---
         
         viable_tokens.sort(key=lambda x: x[1], reverse=True)
 
@@ -522,7 +525,7 @@ def main():
                     text_opening=opening_content
                 )
                 output_file.write(stegotext)
-                print("", file=sys.stderr)
+                print("\n", file=sys.stderr)
 
             elif args.command == 'decode':
                 decoded_bytes = ds.decode(
@@ -531,7 +534,7 @@ def main():
                 )
                 decoded_message = decoded_bytes.decode('utf-8', errors='replace')
                 output_file.write(decoded_message)
-                print("", file=sys.stderr)
+                print("\n", file=sys.stderr)
 
     except (ValueError, RuntimeError, ImportError) as e:
         print(f"Error: {e}", file=sys.stderr)
