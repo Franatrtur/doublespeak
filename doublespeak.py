@@ -31,12 +31,8 @@ def progress_bar(name: str, iteration: int, total: int, length=40, refuse_finish
     
     print(f'\r{extended_name}[{bar}] {percent:.0f}% Complete', end='\r', file=sys.stderr)
     
-    # wait one third of a second total
-    time.sleep(0.33 / total)
-    
     if iteration == total and not refuse_finish:
         print(file=sys.stderr)     # flush
-        time.sleep(0.15)
 
 
 class DoubleSpeak:
@@ -181,7 +177,9 @@ class DoubleSpeak:
             # --- 3. Continue Encoding ---
             base = len(viable_tokens)
             if base == 0:
-                raise RuntimeError('_encode_bytes: Must continue encoding, but no viable (non-EOS) tokens are available!')
+                # This should now be extremely rare, only occurring if the model's entire output
+                # distribution is zero, which would indicate a deeper issue.
+                raise RuntimeError('_encode_bytes: Must continue encoding, but no viable tokens were found at all!')
             
             index = hidden_payload % base
             hidden_payload //= base
@@ -283,7 +281,7 @@ class DoubleSpeak:
         
         logits = outputs.logits[:, -1, :]
 
-        # --- FIX: Step 1: Get the NATURAL probabilities first for sorting later ---
+        # --- Step 1: Get the NATURAL probabilities first for sorting later ---
         natural_probabilities = F.softmax(logits, dim=-1)
 
         # --- Step 2: Create a biased version of the logits for the EOS check ---
@@ -303,9 +301,7 @@ class DoubleSpeak:
         
         viable_mask = torch.ones_like(biased_probabilities[0], dtype=torch.bool)
         viable_mask[indices_to_remove] = False
-
-        eos_token_rank = (sorted_indices[0] == self.tokenizer.eos_token_id).nonzero(as_tuple=True)[0].item()
-
+        
         # --- Step 4: Perform the checks and build the final list ---
         candidate_indices = torch.where(viable_mask)[0]
         
@@ -319,21 +315,36 @@ class DoubleSpeak:
             
             natural_prob = natural_probabilities[0, token_id_int].item()
             viable_tokens.append((token_id_int, natural_prob))
+
+        # If the only viable token after top_p sampling was the EOS token,
+        # but we must continue encoding, we need an alternative.
+        # This block finds the single most probable non-EOS token from the entire
+        # distribution and uses it as the only option.
+        if not viable_tokens and eos_was_viable:
+            if self.debug:
+                print("_next_tokens: Only EOS was viable, finding next best token to continue encoding.", file=sys.stderr)
+            
+            # We will use the already sorted indices from the biased probabilities.
+            # The relative order of non-EOS tokens is the same as in the natural distribution.
+            for token_id_tensor in sorted_indices[0]:
+                token_id_int = token_id_tensor.item()
+                if token_id_int != self.tokenizer.eos_token_id:
+                    # This is the most probable token that is not EOS.
+                    natural_prob = natural_probabilities[0, token_id_int].item()
+                    viable_tokens.append((token_id_int, natural_prob))
+                    break # We only need the single best one.
+        # --- END OF FIX ---
         
         viable_tokens.sort(key=lambda x: x[1], reverse=True)
 
-        # This part of the code for the verbose progress bar remains the same
         if len(viable_tokens) > 0:
-            eos_ratio = eos_token_rank / len(viable_tokens)
-            if eos_ratio > 0.5:
-                eos_probability = 100 * (0.5 / (eos_ratio - 0.5)) if eos_ratio > 0.5 else 100
-            else:
-                eos_probability = 100
+            eos_token_rank = (sorted_indices[0] == self.tokenizer.eos_token_id).nonzero(as_tuple=True)[0].item()
+            eos_ratio = eos_token_rank / len(viable_tokens) if len(viable_tokens) > 0 else float('inf')
+            eos_probability = max(100 * (0.5 / (eos_ratio - 0.5)) if eos_ratio > 0.5 else 100, 100)
 
             if self.verbose and not self.debug:
                 print(f'\rEnding availability: {(eos_probability):.0f}% ===', end='\r', file=sys.stderr)
 
-        # NEW: Return the updated cache from the model's output
         return viable_tokens, eos_was_viable, outputs.past_key_values
 
 
