@@ -91,13 +91,15 @@ Doublespeak is a
 
 ## Tested models
 
-These are all publicly available models on huggingface which can be passed as the model name into Doublespeak. See the `/examples` folder for example runs.
+These are all publicly available models on huggingface which can be passed as the model name into Doublespeak. See the `/examples` folder for example runs, or click on the model name.
 
 | Model Name | Recommended settings | Notes |
 | :--- | :--- | :--- |
 | [**`gpt2`**](./examples/gpt2.md) | `end_bias=3`, `top_p=0.5` | Quick and small for plain text. Can get overwhelmed. |
 | [**`HuggingFaceTB/SmolLM3-3B-Base`**](./examples/smollm3-3b.md) | Text: `end_bias=3`, `top_p=0.65` / Code: `end_bias=6`, `top_p=0.8` | Good bang for your buck. |
 
+--------
+--------
 --------
 --------
   
