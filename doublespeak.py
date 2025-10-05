@@ -47,10 +47,10 @@ class DoubleSpeak:
     InvalidIndex = -2
 
     def __init__(self,
-            model_name="context-labs/meta-llama-Llama-3.2-3B-Instruct-FP16",
-            top_p=0.9,
+            model_name="HuggingFaceTB/SmolLM3-3B-Base",
+            top_p=0.7,
             ending=0,
-            end_bias=7.0,
+            end_bias=4.0,
             verbose=False,
             debug=False
         ):
@@ -393,7 +393,7 @@ def main():
     )
     # ... (all other global arguments like --top-p, --ending, --verbose, etc. remain the same)
     parser.add_argument(
-        '--top-p', type=float, default=0.9,
+        '--top-p', type=float, default=0.7,
         help="Nucleus sampling probability. (default: %(default)s)"
     )
     parser.add_argument(
@@ -401,7 +401,7 @@ def main():
         help="Strategy for ending the generated text.\n(default: %(default)s)"
     )
     parser.add_argument(
-        '--end-bias', type=float, default=7.0,
+        '--end-bias', type=float, default=4.0,
         help="A bias added to the logit of the EOS token.\n(default: %(default)s)"
     )
     parser.add_argument(

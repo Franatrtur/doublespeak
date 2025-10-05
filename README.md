@@ -13,39 +13,41 @@ Unlike traditional text steganography that modifies existing text (e.g., changin
 *   **Flexible I/O:** Supports standard input/output pipes and file inputs (using the `@` prefix).
 *   **Optimized:** Utilizes KV Caching for faster generation and decoding.
 
-## Requirements
+## Getting started
+
+### Requirements
 
 *   Python 3.8+
 *   PyTorch (with CUDA recommended for speed)
-*   Transformers
+*   Transformers library from huggingface
 
 ```bash
-pip install torch transformers list
-# Ensure you have access/login to Hugging Face if using gated models like Llama
+git clone https://github.com/Franatrtur/doublespeak.git
+# RECOMMENDED: create a python venv
+pip install requirements.txt
+# Ensure you have access/login to Hugging Face - if using gated models like Llama
 huggingface-cli login
 ```
 
 ## Usage
 
-Make the script executable or run with `python`.
-
-```bash
-chmod +x doublespeak.py
-```
+Make the script executable `chmod +x doublespeak.py` or run with `python doublespeak.py`.
 
 ### Encoding a Message
 
-To hide a message, use the `encode` command. You can optionally provide an `--opening` to seed the context of the generated text.
-**Note on speed: Model will**
+To hide a message, use the `encode` command. You should provide an `--opening` to seed the context of the generated text.
+
+#### Recommendations
+ - Remember the settings (`model-name`, `top-p`, `end-bias` and potentially `ending`) when encoding. The resulting stegotext cannot be decoded without the proper settings.
+ - Speed: Any model will likely have to be downloaded the first time you use it, which can take a minute or two.
+ - Use an opening with a good direction yet good room for creativity. If the text is too chaotic, try lowering the `top-p` setting.
 
 **Example:** Hide "Meet me at dawn" starting with the text "Regarding the plans for tomorrow," and save to `stegotext.txt`.
 
 ```bash
 ./doublespeak.py encode \
   -m "Meet me at dawn" \
-  -o "Regarding the plans for tomorrow," \
-  -O stegotext.txt \
-  -v
+  -o "Regarding the plans for tomorrow," > stegotext.txt
 ```
 
 Using pipes and stdin:
@@ -55,7 +57,7 @@ echo "Super secret data" | ./doublespeak.py encode > cover.txt
 
 ### Decoding a Message
 
-To recover the message, use the `decode` command. **Crucial:** You must use the exact same `--model-name`, `--top-p`, and `--opening` text that were used during encoding.
+To recover the message, use the `decode` command. **Crucial:** You must use the exact same settings: `--model-name`, `--top-p`, and `--opening` text that were used during encoding.
 
 **Example:** Decode the file created above.
 
@@ -73,9 +75,8 @@ To recover the message, use the `decode` command. **Crucial:** You must use the 
 *   `--top-p`: Nucleus sampling probability. Lower values increase stealth but decrease payload capacity.
     *   *Default:* `0.9`
 *   `--ending`: Strategy for finishing the text (`natural`, `aggressive`, `random`).
-*   `-v` / `--verbose`: Show progress bars and loading status.
 
-Run `./doublespeak.py --help` for a full list of arguments.
+For more details on usage run with `-h` or for example with `encode -h` for info on the encode command parameters.
 
 ## How it Works
 
@@ -94,12 +95,13 @@ These are all publicly available models on huggingface which can be passed as th
 
 | Model Name | Recommended settings | Notes |
 | :--- | :--- | :--- |
-| **`gpt2`** | `end_bias=3`, `top_p=0.5` | Quick and small for plain text. Can get overwhelmed. |
-| **`HuggingFaceTB/SmolLM3-3B-Base`** | Text: `end_bias=3`, `top_p=0.65` / Code: `end_bias=6`, `top_p=0.8` | Good bang for your buck. |
+| [**`gpt2`**](./examples/gpt2.md) | `end_bias=3`, `top_p=0.5` | Quick and small for plain text. Can get overwhelmed. |
+| [**`HuggingFaceTB/SmolLM3-3B-Base`**](./examples/smollm3-3b.md) | Text: `end_bias=3`, `top_p=0.65` / Code: `end_bias=6`, `top_p=0.8` | Good bang for your buck. |
 
-
-
-Here we present some suggested models for the future:
+--------
+--------
+  
+Here we present some models to test in the future:
 
 ### Open-Source Base LLMs (<6B Parameters)
 
