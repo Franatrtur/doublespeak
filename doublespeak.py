@@ -368,7 +368,7 @@ def main():
     result to standard output or a specified file.
     """
     # Define ANSI color codes for the logo
-    ORANGE = '\033[38;2;255;165;0m'
+    COLOR = '\033[38;0;115;83;239m'
     RESET = '\033[0m'
 
     parser = argparse.ArgumentParser(
@@ -492,7 +492,7 @@ def main():
             logo_path = Path(__file__).parent / 'logo.txt'
             with open(logo_path, 'r') as f:
                 logo = f.read()
-            print(f"{ORANGE}{logo}{RESET}", file=sys.stderr)
+            print(f"{COLOR}{logo}{RESET}", file=sys.stderr)
         except (FileNotFoundError, NameError):
             print('DS', file=sys.stderr)
         print(f"--- DoubleSpeak v{VERSION} ---", file=sys.stderr)
