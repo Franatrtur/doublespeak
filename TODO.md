@@ -8,4 +8,4 @@
     5) if the output is good, move it into a new .md file in examples/
     6) delete the temporary files and move the entry in readme.md to the tested part, include a link to the .md example file in the model name col
 
-make smaller tests payloads so they run faster
+ - make smaller tests payloads so they run faster

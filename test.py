@@ -8,10 +8,10 @@ class TestSmollLM3B(unittest.TestCase):
     def test_encode_decode_article(self):
         # Parameters from examples/smollm3-3b.md
         model_name = "HuggingFaceTB/SmolLM3-3B-Base"
-        end_bias = 3
+        end_bias = 5
         top_p = 0.65
         ending = "natural"
-        secret_message_str = "send 0.5btc to adress 0xe4ffd093"
+        secret_message_str = "test"
         secret_message_bytes = secret_message_str.encode('utf-8')
 
         # Map string ending to enum
@@ -47,7 +47,7 @@ class TestSmollLM3B(unittest.TestCase):
         end_bias = 6
         top_p = 0.75
         ending = "natural"
-        secret_message_str = "send 0.5btc to adress 0xe4ffd093"
+        secret_message_str = "test"
         secret_message_bytes = secret_message_str.encode('utf-8')
         self.maxDiff = None
 

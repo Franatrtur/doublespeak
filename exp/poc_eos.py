@@ -1,3 +1,7 @@
+"""
+Proof of concept for EOS bias.
+"""
+
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForCausalLM

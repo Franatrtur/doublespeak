@@ -1,3 +1,8 @@
+"""
+Proof of concept for bidirectional stenography.
+"""
+
+
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch.nn.functional as F
