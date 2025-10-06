@@ -29,7 +29,7 @@ These are all publicly available models on huggingface which can be passed as th
 
 You can import and use the `DoubleSpeak` class directly in your Python projects. This allows for more flexible integration than the command-line interface.
 To hide a message, use the `encode` method. To retrieve it, use the `decode` method.  
-Ensure you use the **exact same** initialization parameters (`model_name`, `top_p`, etc.) and the same `text_opening` for both operations. You should provide an opening to seed the context of the generated text. For better experience, see our [recommendations](#recommendations).
+Ensure you use the **exact same** initialization parameters (`model_name`, `top_p`, etc.) and the same `text_opening` for both operations. You should provide an opening to seed the context of the generated text. For better results, see our [recommendations](#recommendations).
 
 ### Python usage
 
@@ -48,13 +48,13 @@ decoded_bytes = ds.decode(
 ```
 See the [python example](./examples/example.py) for more.
 
-### Encoding and Decoding a Secret Message
+### Commandline usage
 
 Make the script executable (only if using venv) `chmod +x doublespeak.py` or run with `python doublespeak.py`.  
 
 The secret message is provided as bytes and is be hidden in a generated "stegotext".
 
-Example usage from commandline:
+Example:
 ```bash
 #   === script ===    =========== settigns =-=========  = op =      ============== input & output ================
 python doublespeak.py --model-name="gpt2" --top-p 0.45  encode -m "secret message" -o @opening_text.txt > stegotext.txt
@@ -95,38 +95,5 @@ This tool is for educational and research purposes. Large language models were u
 ## Contributing
 
 We need help with development and testing, see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
-
-
-
-
-
-
-
-
-
-
-## Encoding and Decoding a Secret Message
-
-You can import and use the `DoubleSpeak` class directly in your Python projects. This allows for more flexible integration than the command-line interface.
-To hide a message, use the `encode` method. To retrieve it, use the `decode` method. Ensure you use the **exact same** initialization parameters (`model_name`, `top_p`, etc.) and the same `text_opening` for both operations.
-
-### Python usage
-
-A super fast python starter:
-```python
-from doublespeak import DoubleSpeak
-ds = DoubleSpeak()
-stegotext = ds.encode(
-    hidden_message=b"This is a very secret message.",
-    text_opening="The launch codes are as follows:"
-)
-decoded_bytes = ds.decode(
-    stegotext=stegotext,
-    text_opening="The launch codes are as follows:"
-)
-```
-See the [python example](./examples/example.py) for more.
-
-#### Commandline usage
 
 

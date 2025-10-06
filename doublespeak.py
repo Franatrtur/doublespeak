@@ -8,7 +8,7 @@ import argparse
 import sys
 import time
 
-VERSION = '0.1'
+VERSION = '0.1.0'
 
 Token = Any
 
@@ -368,7 +368,7 @@ def main():
     result to standard output or a specified file.
     """
     # Define ANSI color codes for the logo
-    COLOR = '\033[38;0;115;83;239m'
+    COLOR = '\033[38;2;115;83;239m'
     RESET = '\033[0m'
 
     parser = argparse.ArgumentParser(
