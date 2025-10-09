@@ -7,8 +7,9 @@ import torch.nn.functional as F
 import argparse
 import sys
 import time
+import json
 
-VERSION = '0.1.0'
+VERSION = '0.1.2'
 
 Token = Any
 
@@ -49,6 +50,7 @@ class DoubleSpeak:
 
     def __init__(self,
             model_name="HuggingFaceTB/SmolLM3-3B-Base",
+            device="auto",
             top_p=0.7,
             ending=0,
             end_bias=4.0,
@@ -56,6 +58,7 @@ class DoubleSpeak:
             debug=False
         ):
         self.model_name = model_name
+        self.device = device
         self.top_p = top_p
         self.ending = ending if ending != 0 else DoubleSpeak.NaturalEnd
         self.end_bias = end_bias
@@ -63,18 +66,19 @@ class DoubleSpeak:
         self.debug = debug
         self.loaded = False
 
+        if self.device == "auto":
+           self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
     def load_model(self, **kwargs):
         """Loads the model and tokenizer from Hugging Face."""
         if self.verbose or self.debug:
             print(f"Loading doublespeak model: {self.model_name}", file=sys.stderr)
         
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
             torch_dtype=torch.float16,
-            device_map=device,
+            device_map=self.device,
             **kwargs
         )
         self.device = self.model.device
@@ -351,9 +355,29 @@ class DoubleSpeak:
 
         return viable_tokens, eos_was_viable, outputs.past_key_values
 
+    
+    def export_settings(self) -> str:
+        return "settings" + json.dumps([VERSION, self.model_name, self.device, self.top_p, self.ending, self.end_bias])
+
+    def import_settings(self, str_settings):
+
+        while str_settings[0] != "[":
+            str_settings = str_settings[1:]
+
+        try:
+            version, *settings = json.loads(str_settings)
+        except:
+            raise f"Couldn't import settings from {repr(str_settings)}: invalid json"
+
+        if version.startswith("0.1"):
+            self.model_name, self.device, self.top_p, self.ending, self.end_bias = settings
+
+        else:
+            raise f"Couldn't import settings from {repr(str_settings)}: invalid version"
+
 
     def __str__(self):
-        return f'DoubleSpeak({self.model_name=},{self.top_p=},{self.ending=},{self.end_bias=},{self.verbose=},{self.debug=}) <{self.loaded=}>'
+        return f'DoubleSpeak({self.model_name=},{self.device=},{self.top_p=},{self.ending=},{self.end_bias=},{self.verbose=},{self.debug=}) <{self.loaded=}>'
 
     def __repr__(self):
         return str(self)
@@ -387,12 +411,23 @@ def main():
 
     # --- Global arguments for the DoubleSpeak class configuration ---
     parser.add_argument(
+        '--settings',
+        type=str,
+        default="",
+        help="Settings string previously exported from a doublespeak object. If provided, overrides all other settings."
+    )
+    parser.add_argument(
         '--model-name',
         type=str,
         default="HuggingFaceTB/SmolLM3-3B-Base",
         help="The Hugging Face model identifier to use.\n(default: %(default)s)"
     )
-    # ... (all other global arguments like --top-p, --ending, --verbose, etc. remain the same)
+    parser.add_argument(
+        '--device',
+        choices=['auto', 'cpu', 'cuda'],
+        default="auto",
+        help="Device on which the doublespeak LLM model will be loaded and run."
+    )
     parser.add_argument(
         '--top-p', type=float, default=0.7,
         help="Nucleus sampling probability. (default: %(default)s)"
@@ -511,12 +546,19 @@ def main():
     try:
         ds = DoubleSpeak(
             model_name = args.model_name,
+            device = args.device,
             top_p = args.top_p,
             ending = ending_map[args.ending],
             end_bias = args.end_bias,
             verbose = not args.quiet,
             debug = args.debug
         )
+
+        if args.settings:
+            ds.import_settings(args.settings)
+
+        if not args.quiet or args.debug:
+            print(ds.export_settings(), file=sys.stderr)
 
         with args.output as output_file:
             if args.command == 'encode':

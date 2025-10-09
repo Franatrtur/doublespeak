@@ -31,6 +31,8 @@ You can import and use the `DoubleSpeak` class directly in your Python projects.
 To hide a message, use the `encode` method. To retrieve it, use the `decode` method.  
 Ensure you use the **exact same** initialization parameters (`model_name`, `top_p`, etc.) and the same `text_opening` for both operations. You should provide an opening to seed the context of the generated text. For better results, see our [recommendations](#recommendations).
 
+__Successful transfer of the message is not guaranteed.__ Unfortunately. See the section on [inference determinism problems](#determinism).
+
 ### Python usage
 
 A super fast python starter:
@@ -68,13 +70,14 @@ echo "secret message" | ./doublespeak.py -o "Vacation will take place in" encode
 
 *   `--model-name`: The Hugging Face model ID to use. (*Default:* `HuggingFaceTB/SmolLM3-3B-Base`)
 *   `--top-p`: Nucleus sampling probability. Lower values increase stealth but decrease payload capacity.
-*   `--ending`: Strategy for finishing the text (`natural`, `aggressive`, `random`).
+*   `--end-bias`: How strongly does the model want to end the text after encoding the whole payload.
 
 For more details run with `-h` or for example with `encode -h` for info on the encode command parameters (message, opening, ...).
+There are methods `DoubleSpeak.export_settings` and `import_settings(str)` which serialize the settings of the Doublespeak object. Automatically exported in commandline usage.
 
 
 #### Recommendations
- - Remember the settings (`model-name`, `opening`, `top-p`, `end-bias` and potentially `ending`) when encoding. The resulting stegotext cannot be decoded without the proper settings.
+ - Remember the settings (`model-name`, `opening`, `top-p`, `end-bias` and potentially `ending` and `device`) when encoding. The resulting stegotext cannot be decoded without the proper settings.
  - Speed: Any model will likely have to be downloaded the first time you use it, which can take a minute or two.
  - Use a longer opening with a good direction yet good room for creativity. Do not end the opening with a space. If the text is too chaotic, try lowering the `top-p` setting.
  - Pay attention to newlines/spaces at the end of your stegotext! They are represented as tokens too and can confuse the model or disrupt the decoding process completely. 
@@ -86,6 +89,16 @@ Unlike traditional text steganography that modifies existing text (e.g., changin
 Normally, an LLM generates text by calculating probabilities for the next word and randomly sampling from the best options (defined by `top_p`).
 
 DoubleSpeak intercepts this step. Instead of rolling a die, it uses the bits of your secret message to mathematically determine which valid token to choose next. To a casual observer (or statistical analyzer not possessing the exact setup and message), the text appears to be generated randomly.
+
+## Determinism
+
+Generating the exact same text twice is not guaranteed. Different hardware, especially CPUs versus GPUs, will almost certainly produce different text even with identical settings. 
+Different hardware (especially CPU vs. GPU) will produce different results because they handle math differently. This can cause the message to be lost.
+
+To mitigate this, we provide the `device` setting, allowing you to specify `cpu` or `cuda`. While two different CPUs are more likely to produce the same output than a CPU and a GPU, this is still not a guarantee.
+
+Perfect reproducibility, even on a single device, is a notoriously difficult problem, as described [this paper](https://www.rivista.ai/wp-content/uploads/2025/09/https___thinkingmachines.pdf). We plan on integrating the batch-invariant version of tensor operations into DoubleSpeak in the near future.
+
 
 ## Disclaimer
 
